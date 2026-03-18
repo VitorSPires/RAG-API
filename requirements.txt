@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+psycopg2-binary
+python-dotenv
+sqlalchemy
+pgvector
+python-multipart
+openai
+httpx
+tiktoken
+python-docx
+PyPDF2
+firebase-admin
+google-cloud-storage 

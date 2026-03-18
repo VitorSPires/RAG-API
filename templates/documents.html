@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base - IPAlpha</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #fbbe0a 0%, #f39c12 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #fbbe0a;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #fbbe0a;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px dashed #ddd;
+        }
+
+        .upload-section:hover {
+            border-color: #fbbe0a;
+        }
+
+        .upload-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .file-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .file-input:focus {
+            outline: none;
+            border-color: #fbbe0a;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: #fbbe0a;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #f39c12;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover:not(:disabled) {
+            background: #138496;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .documents-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .documents-table th,
+        .documents-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .documents-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .documents-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .file-hash {
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+        }
+
+        /* Modal de Loading */
+        .loading-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #fbbe0a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .loading-subtext {
+            font-size: 14px;
+            color: #666;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Loading modal -->
+    <div class="loading-modal" id="loading-modal">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loading-text">Processing...</div>
+            <div class="loading-subtext" id="loading-subtext">Please wait a moment</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Knowledge Base - IPAlpha</h1>
+            <p>Management Interface</p>
+        </div>
+
+        <div class="content">
+            <!-- Statistics -->
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-docs">-</div>
+                    <div class="stat-label">Total Documents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-size">-</div>
+                    <div class="stat-label">Total Size</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="last-upload">-</div>
+                    <div class="stat-label">Last Upload</div>
+                </div>
+            </div>
+
+            <!-- Upload section -->
+            <div class="upload-section">
+                <h3 style="margin-bottom: 15px; color: #333;">📤 Add New Document</h3>
+                <form class="upload-form" id="upload-form">
+                    <input type="file" class="file-input" id="file-input" required>
+                    <button type="submit" class="btn btn-primary" id="upload-btn">Upload</button>
+                </form>
+            </div>
+
+            <!-- Messages -->
+            <div id="messages"></div>
+
+            <!-- Documents table -->
+            <div class="table-container">
+                <table class="documents-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>File Name</th>
+                            <th>Hash</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documents-tbody">
+                        <tr>
+                            <td colspan="5" class="loading">Loading documents...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper functions
+        function showMessage(message, type = 'success') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        function showLoading(text = 'Processing...', subtext = 'Please wait a moment') {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading-subtext').textContent = subtext;
+            document.getElementById('loading-modal').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-modal').style.display = 'none';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Load documents
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/documents');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateStats(data.data.stats);
+                    updateTable(data.data.documents);
+                } else {
+                    throw new Error(data.message || 'Error loading documents');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error loading documents: ' + error.message, 'error');
+                document.getElementById('documents-tbody').innerHTML = 
+                    '<tr><td colspan="5" class="loading">Error loading documents</td></tr>';
+            }
+        }
+
+        // Update statistics
+        function updateStats(stats) {
+            document.getElementById('total-docs').textContent = stats.total_documents;
+            document.getElementById('total-size').textContent = stats.total_size || 'N/A';
+            document.getElementById('last-upload').textContent = stats.last_upload || 'N/A';
+        }
+
+        // Update table
+        function updateTable(documents) {
+            const tbody = document.getElementById('documents-tbody');
+            
+            if (documents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="loading">No documents found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = documents.map(doc => `
+                <tr>
+                    <td>${doc.id}</td>
+                    <td>
+                        <div class="file-name">${doc.file_name}</div>
+                        <div class="file-hash">${doc.file_id}</div>
+                    </td>
+                    <td>
+                        <div class="file-hash">${doc.file_hash.substring(0, 16)}...</div>
+                    </td>
+                    <td>${formatDate(doc.processed_at)}</td>
+                    <td>
+                        <div class="actions">
+                            ${doc.file_url && doc.file_url.startsWith('http') ? 
+                                `<button class="btn btn-info btn-sm" onclick="viewDocument('${doc.file_url}')" title="View file">👁️ View</button>` : 
+                                ''
+                            }
+                            <button class="btn btn-danger btn-sm" onclick="deleteDocument(${doc.id})">🗑️ Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // File upload
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('file-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showMessage('Select a file', 'error');
+                return;
+            }
+
+            // Disable button and show loading
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            showLoading('Uploading file...', 'This may take a few seconds');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showMessage('Document added successfully!');
+                    fileInput.value = '';
+                    loadDocuments();
+                } else if (data.status === 'warning') {
+                    showMessage(data.message, 'error');
+                } else {
+                    throw new Error(data.message || 'Upload error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Upload error: ' + error.message, 'error');
+            } finally {
+                // Re-enable button and hide loading
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload';
+                hideLoading();
+            }
+        });
+        
+        // View document
+        function viewDocument(fileUrl) {
+            if (fileUrl && fileUrl.startsWith('http')) {
+                window.open(fileUrl, '_blank');
+            } else {
+                showMessage('File URL not available', 'error');
+            }
+        }
+        
+        // Delete document
+        async function deleteDocument(id) {
+            if (!confirm('Are you sure you want to delete this document?')) {
+                return;
+            }
+        
+            // Show loading
+            showLoading('Deleting document...', 'Removing file and data...');
+
+            try {
+                const response = await fetch(`/documents/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showMessage('Document deleted successfully!');
+                    loadDocuments();
+                } else {
+                    throw new Error(data.message || 'Error deleting document');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error deleting document: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Load documents on startup
+        document.addEventListener('DOMContentLoaded', loadDocuments);
+    </script>
+</body>
+</html> 
