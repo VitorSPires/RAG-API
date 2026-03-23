@@ -47,7 +47,23 @@ class DocumentProcessor:
     def count_tokens(self, text: str) -> int:
         """Contar tokens em um texto usando tiktoken"""
         return len(self.tokenizer.encode(text))
-    
+
+    @staticmethod
+    def _sanitize_text_for_db(text: str) -> str:
+        """
+        Remove bytes NUL (0x00) do texto.
+
+        PostgreSQL não aceita \\x00 em colunas TEXT; PyPDF2 às vezes os inclui
+        na extração de PDFs gerados por certas ferramentas.
+        """
+        if not text or "\x00" not in text:
+            return text
+        cleaned = text.replace("\x00", "")
+        logger.warning(
+            "Removidos caracteres NUL (0x00) do texto extraído — comum em alguns PDFs"
+        )
+        return cleaned
+
     def extract_text_from_file(self, file_content: bytes, file_name: str) -> Optional[str]:
         """Extrair texto de um arquivo baseado na extensão"""
         logger.info(f"=== INICIANDO EXTRAÇÃO DE TEXTO ===")
@@ -69,8 +85,9 @@ class DocumentProcessor:
             logger.info(f"Usando extrator: {extractor.__name__}")
             
             text = extractor(file_content)
-            
+
             if text:
+                text = self._sanitize_text_for_db(text)
                 logger.info(f"Texto extraído de {file_name}: {len(text)} caracteres")
                 return text
             else:
