@@ -6,11 +6,12 @@ from contextlib import asynccontextmanager
 from typing import List, Optional
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.orm import declarative_base, sessionmaker
 import logging
 from document_manager import document_manager
 from embedding_manager import embedding_manager
+from config import create_database_engine, get_cors_allowed_origins
 
 # Load environment variables
 load_dotenv()
@@ -19,17 +20,8 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Database configuration - use public URL for external access
-DATABASE_URL = os.getenv("DATABASE_PUBLIC_URL")
-if not DATABASE_URL:
-    raise ValueError("DATABASE_PUBLIC_URL not found in environment variables")
-
-# Convert postgres:// to postgresql:// when needed
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
 # SQLAlchemy configuration
-engine = create_engine(DATABASE_URL)
+engine = create_database_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -84,13 +76,7 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:4173",
-        "https://base-conhecimento-ipalpha.up.railway.app",
-        "*"  # Para desenvolvimento, permitir todas as origens
-    ],
+    allow_origins=get_cors_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -420,7 +406,7 @@ async def semantic_search(
     try:
         query_embedding = embedding_manager.client.embeddings.create(
             input=[query],
-            model="text-embedding-3-small"
+            model=embedding_manager.model
         )
         
         query_vector = query_embedding.data[0].embedding
@@ -533,7 +519,7 @@ async def semantic_search_for_llm(
     try:
         query_embedding = embedding_manager.client.embeddings.create(
             input=[query],
-            model="text-embedding-3-small"
+            model=embedding_manager.model
         )
         
         query_vector = query_embedding.data[0].embedding

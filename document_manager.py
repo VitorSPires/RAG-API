@@ -2,16 +2,16 @@
 Module for managing documents and their lifecycle.
 """
 
-import os
 import hashlib
 import logging
 from typing import Dict, List, Optional
 from datetime import datetime
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from dotenv import load_dotenv
 from document_processor import document_processor, TextChunk
 from firebase_storage import firebase_storage
 from embedding_manager import embedding_manager
+from config import create_database_engine
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,11 +20,7 @@ logger = logging.getLogger(__name__)
 class DocumentManager:
     def __init__(self):
         load_dotenv()
-        self.database_url = os.getenv("DATABASE_PUBLIC_URL")
-        if self.database_url.startswith("postgres://"):
-            self.database_url = self.database_url.replace("postgres://", "postgresql://", 1)
-        
-        self.engine = create_engine(self.database_url)
+        self.engine = create_database_engine()
     
     def _calculate_file_hash(self, file_content: bytes) -> str:
         """Calculate SHA-256 hash for the given file content."""

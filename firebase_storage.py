@@ -64,8 +64,11 @@ class FirebaseStorageManager:
             
             cred = credentials.Certificate(cred_dict)
             
-            # Use the correct Firebase Storage bucket
-            bucket_name = "ipalpha-banco-vetorial.firebasestorage.app"
+            # Prefer explicit env bucket; fallback to project-based default.
+            bucket_name = (
+                os.getenv("FIREBASE_STORAGE_BUCKET")
+                or f"{cred_dict['project_id']}.firebasestorage.app"
+            )
             
             firebase_admin.initialize_app(
                 cred,

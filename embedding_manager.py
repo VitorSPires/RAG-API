@@ -7,7 +7,8 @@ import logging
 from typing import List, Dict, Optional
 from openai import OpenAI
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
+from config import create_database_engine, get_embedding_model
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,16 +29,12 @@ class EmbeddingManager:
         except Exception as e:
             logger.error(f"Error configuring OpenAI client: {e}")
             raise
-        self.model = "text-embedding-3-small"
+        self.model = get_embedding_model()
         self.max_tokens_per_request = 8191  # Model limit
         self.safety_margin = 1000  # Safety margin
         
         # Configure database
-        database_url = os.getenv("DATABASE_PUBLIC_URL")
-        if database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql://", 1)
-        
-        self.engine = create_engine(database_url)
+        self.engine = create_database_engine()
     
     def create_embeddings_batch(self, chunks: List[Dict]) -> List[Dict]:
         """
