@@ -106,16 +106,19 @@ class EmbeddingManager:
                     embedding_vector = embedding_data['embedding']
                     vector_str = f"[{','.join(map(str, embedding_vector))}]"
                     
-                    # Insert into embeddings table using direct string formatting
-                    sql = f"""
+                    sql = text("""
                         INSERT INTO embeddings (chunk_id, embedding_vector, model_name, created_at)
-                        VALUES ('{embedding_data['chunk_id']}', '{vector_str}'::vector, '{self.model}', NOW())
+                        VALUES (:chunk_id, CAST(:vector_str AS vector), :model_name, NOW())
                         ON CONFLICT (chunk_id) DO UPDATE SET
                             embedding_vector = EXCLUDED.embedding_vector,
                             model_name = EXCLUDED.model_name,
                             updated_at = NOW()
-                    """
-                    connection.execute(text(sql))
+                    """)
+                    connection.execute(sql, {
+                        "chunk_id": embedding_data["chunk_id"],
+                        "vector_str": vector_str,
+                        "model_name": self.model,
+                    })
                 
                 connection.commit()
                 logger.info(f"Embeddings saved to database: {len(embeddings)} vectors")

@@ -193,6 +193,7 @@ class DocumentProcessor:
             
             current_position += len(first_chunk_text)
             current_chunk_index += 1
+            previous_chunk_text = first_chunk_text
             
             # Chunks subsequentes: 250 tokens com overlap de 50 tokens
             remaining_text = paragraph[current_position:].strip()
@@ -200,7 +201,7 @@ class DocumentProcessor:
             while remaining_text:
                 # Pegar os últimos 50 tokens do chunk anterior como overlap
                 overlap_text = self._get_text_for_token_count(
-                    first_chunk_text, 
+                    previous_chunk_text,
                     self.overlap_tokens, 
                     from_end=True
                 )
@@ -231,6 +232,7 @@ class DocumentProcessor:
                 
                 current_position += len(new_text)
                 current_chunk_index += 1
+                previous_chunk_text = new_text
                 remaining_text = remaining_text[len(new_text):].strip()
         
         return chunks

@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from typing import List, Optional
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -121,14 +122,6 @@ async def test_database():
             vector_test = None
             if pgvector_installed:
                 try:
-                    test_result = connection.execute(text("SELECT '[1,2,3]'::vector as test_vector"))
-                    vector_test = str(test_result.scalar())
-                except Exception as e:
-                    vector_test = f"Error: {str(e)}"
-            
-            vector_test = None
-            if pgvector_installed:
-                try:
                     connection.execute(text("""
                         CREATE TEMP TABLE temp_test_vectors (
                             id SERIAL PRIMARY KEY,
@@ -158,7 +151,7 @@ async def test_database():
                     "pgvector_installed": pgvector_installed,
                     "vector_test": vector_test
                 },
-                "timestamp": "2024-01-01T00:00:00Z"
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
     except Exception as e:
@@ -166,7 +159,7 @@ async def test_database():
             "status": "error",
             "message": f"Error while connecting to database: {str(e)}",
             "database_info": None,
-            "timestamp": "2024-01-01T00:00:00Z"
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 @app.get("/", response_class=HTMLResponse)
@@ -411,9 +404,10 @@ async def semantic_search(
         
         query_vector = query_embedding.data[0].embedding
         vector_str = f"[{','.join(map(str, query_vector))}]"
+        distance_threshold = 1.0 - similarity_threshold
         
         with engine.connect() as connection:
-            sql = f"""
+            sql = text("""
                 SELECT 
                     tc.chunk_id,
                     tc.content,
@@ -422,15 +416,19 @@ async def semantic_search(
                     tc.token_count,
                     d.file_name,
                     d.id as document_id,
-                    e.embedding_vector <=> '{vector_str}'::vector as similarity
+                    e.embedding_vector <=> CAST(:vector_str AS vector) as similarity
                 FROM text_chunks tc
                 JOIN documents d ON tc.document_id = d.id
                 JOIN embeddings e ON tc.chunk_id = e.chunk_id
-                WHERE e.embedding_vector <=> '{vector_str}'::vector < {1.0 - similarity_threshold}
-                ORDER BY e.embedding_vector <=> '{vector_str}'::vector
-                LIMIT {limit}
-            """
-            result = connection.execute(text(sql))
+                WHERE e.embedding_vector <=> CAST(:vector_str AS vector) < :distance_threshold
+                ORDER BY e.embedding_vector <=> CAST(:vector_str AS vector)
+                LIMIT :limit
+            """)
+            result = connection.execute(sql, {
+                "vector_str": vector_str,
+                "distance_threshold": distance_threshold,
+                "limit": limit,
+            })
             
             results = []
             for row in result.fetchall():
@@ -526,21 +524,24 @@ async def semantic_search_for_llm(
         vector_str = f"[{','.join(map(str, query_vector))}]"
         
         with engine.connect() as connection:
-            sql = f"""
+            sql = text("""
                 SELECT 
                     tc.chunk_id,
                     tc.content,
                     tc.chunk_index,
                     d.file_name,
                     d.file_url,
-                    e.embedding_vector <=> '{vector_str}'::vector as similarity
+                    e.embedding_vector <=> CAST(:vector_str AS vector) as similarity
                 FROM text_chunks tc
                 JOIN documents d ON tc.document_id = d.id
                 JOIN embeddings e ON tc.chunk_id = e.chunk_id
-                ORDER BY e.embedding_vector <=> '{vector_str}'::vector
-                LIMIT {limit}
-            """
-            result = connection.execute(text(sql))
+                ORDER BY e.embedding_vector <=> CAST(:vector_str AS vector)
+                LIMIT :limit
+            """)
+            result = connection.execute(sql, {
+                "vector_str": vector_str,
+                "limit": limit,
+            })
             
             results = []
             for row in result.fetchall():
