@@ -1,6 +1,6 @@
-# RAG-API – FastAPI Vector Database API with PostgreSQL + pgvector + OpenAI
+# RAG-Platform – FastAPI Vector Database API with PostgreSQL + pgvector + OpenAI
 
-RAG-API is a FastAPI-based backend that implements a complete Retrieval-Augmented Generation (RAG) pipeline.  
+RAG-Platform is a FastAPI-based backend that implements a complete Retrieval-Augmented Generation (RAG) pipeline.  
 It lets you upload documents, split them into text chunks, create embeddings with OpenAI, store everything in PostgreSQL + pgvector, and query the content through semantic search endpoints.
 
 This project demonstrates a complete RAG pipeline built on top of FastAPI, PostgreSQL + pgvector and OpenAI.
@@ -61,7 +61,7 @@ This project demonstrates a complete RAG pipeline built on top of FastAPI, Postg
 
 <!-- IMAGE_PROMPT:
 Generate a clean architecture diagram for this RAG API:
-- FastAPI backend (RAG-API)
+- FastAPI backend (RAG-Platform)
 - Document upload -> document processing (chunking) -> embeddings creation with OpenAI
 - PostgreSQL + pgvector as the vector store (documents, text_chunks, embeddings tables)
 - Semantic search endpoints (/search, /search/llm) querying the vector store
@@ -69,7 +69,7 @@ Style: minimal, modern, developer-friendly, neutral colors, no background image.
 -->
 
 <!-- When the image is generated, replace this comment with:
-![RAG-API Architecture](docs/images/rag-architecture.png)
+![RAG-Platform Architecture](docs/images/rag-architecture.png)
 -->
 
 ---
@@ -90,6 +90,33 @@ Style: minimal, modern, developer-friendly, neutral colors, no background image.
 
 ## Getting Started
 
+### Quickstart in 60 seconds
+
+Run this if you already have PostgreSQL + pgvector available and an OpenAI API key:
+
+```bash
+# 1) Clone and enter the repository
+git clone <your-repo-url>
+cd RAG-Platform
+
+# 2) Create and activate virtual environment
+python -m venv venv
+venv\Scripts\activate   # Windows PowerShell
+# source venv/bin/activate  # Linux/macOS
+
+# 3) Install dependencies
+pip install -r requirements.txt
+
+# 4) Configure environment variables
+cp .env.example .env
+# fill DATABASE_URL or DATABASE_PUBLIC_URL and OPENAI_API_KEY
+
+# 5) Start the API
+uvicorn app.main:app --reload
+```
+
+If you need full setup details (database scripts, optional Firebase, and integration tests), follow the sections below in this README.
+
 ### Prerequisites
 
 - Python **3.9+**
@@ -101,7 +128,7 @@ Style: minimal, modern, developer-friendly, neutral colors, no background image.
 
 ```bash
 git clone <your-repo-url>
-cd RAG-API
+cd RAG-Platform
 ```
 
 ### Create and activate a virtual environment
@@ -157,7 +184,7 @@ pytest -m integration
    - PostgreSQL connection URLs (`DATABASE_PUBLIC_URL`, optionally `DATABASE_URL`).
    - `OPENAI_API_KEY`.
    - Optional `OPENAI_CHAT_MODEL` (default `gpt-4o-mini`) for **`POST /chat`**.
-   - Optional **`AGENT_SYSTEM_PROMPT`**: extra system text for the ReAct loop only. Default is none—the final answer shape is enforced by structured output ([`AgentAnswerPayload`](b:/Documentos/Programacao/open-source/RAG/RAG-API/app/agent/schemas.py): `reply` + `source_document_ids` the model claims it used, validated against `document_id` values from `semantic_search` tool JSON).
+   - Optional **`AGENT_SYSTEM_PROMPT`**: extra system text for the ReAct loop only. Default is none—the final answer shape is enforced by structured output ([`AgentAnswerPayload`](app/agent/schemas.py): `reply` + `source_document_ids` the model claims it used, validated against `document_id` values from `semantic_search` tool JSON).
    - Firebase / Google Cloud credentials if you plan to upload files there.
    - Optional `HOST` and `PORT` overrides.
 
@@ -235,7 +262,7 @@ Show the relationships between them and keep the style clean and minimal.
 -->
 
 <!-- When the image is generated, replace this comment with:
-![RAG-API Database Schema](docs/images/rag-database-schema.png)
+![RAG-Platform Database Schema](docs/images/rag-database-schema.png)
 -->
 
 ---
@@ -287,6 +314,27 @@ By default, the API will be available at:
 ---
 
 ## API Overview
+
+### Endpoints quick reference
+
+| Method | Route | Purpose | Primary use case |
+|---|---|---|---|
+| `GET` | `/health` | Basic API and DB health status | Service health checks and uptime probes |
+| `GET` | `/test-db` | PostgreSQL + pgvector diagnostics | Validate DB connectivity and vector extension |
+| `GET` | `/documents` | List documents and high-level stats | Admin/document management UI |
+| `GET` | `/documents/{id}` | Fetch one document metadata | Detail views and programmatic lookup |
+| `POST` | `/documents/upload` | Upload + process + embed document | Ingestion entrypoint for new knowledge |
+| `PUT` | `/documents/{id}` | Update document metadata | Rename/fix metadata without re-upload |
+| `DELETE` | `/documents/{id}` | Delete document, chunks, embeddings, storage file | Data cleanup and reindex workflows |
+| `GET` | `/documents/stats` | Document aggregate stats | Dashboard cards and monitoring |
+| `GET` | `/documents/{id}/chunks` | List all chunks from one document | Debug chunking quality and context windows |
+| `GET` | `/chunks/stats` | Chunk token distribution stats | Validate chunking strategy |
+| `GET` | `/embeddings/stats` | Embedding/model aggregate stats | Verify index coverage and embedding model |
+| `GET` | `/search` | Full semantic search with scores + neighbors | Developer/debug retrieval analysis |
+| `GET` | `/search/llm` | Lightweight search for LLM context injection | Agent/tool and external LLM clients |
+| `POST` | `/chat` | LangGraph ReAct chat with thread checkpoints | Stateful grounded assistant experience |
+| `GET` | `/` | HTML admin interface | Human-first operational UI |
+| `GET` | `/interface` | Alias for admin interface | Alternative UI route |
 
 ### Health and diagnostics
 
@@ -392,4 +440,6 @@ This project is primarily a showcase, but contributions are welcome:
 
 ## License
 
-Choose the license that best fits your needs (for example, MIT or Apache-2.0) and update this section accordingly.
+This project is licensed under the MIT License.
+
+See [LICENSE](LICENSE) for details.
