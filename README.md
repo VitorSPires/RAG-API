@@ -22,6 +22,9 @@ This project demonstrates a complete RAG pipeline built on top of FastAPI, Postg
   - `/search`: semantic search with similarity scores and context (previous/next chunk).
   - `/search/llm`: lightweight endpoint optimized for LLMs (text + file metadata only).
 
+- **Chat agent (LangGraph)**
+  - `POST /chat`: react-style agent with a **semantic search tool** (same retrieval as `/search/llm`) and **Postgres checkpointing** per `thread_id`.
+
 - **Statistics**
   - `/documents/stats`: high-level document counts and sizes.
   - `/chunks/stats`: statistics about chunks and token distribution.
@@ -38,13 +41,23 @@ This project demonstrates a complete RAG pipeline built on top of FastAPI, Postg
 
 ## Architecture Overview
 
-At a high level, the flow is:
+### Repository layout
+
+- **`app/main.py`** – FastAPI app, CORS, lifespan (DB health, pgvector, LangGraph Postgres checkpointer `setup()`, agent graph).
+- **`app/api/`** – HTTP routers (health, documents, search, stats, HTML UI, **`POST /chat`**).
+- **`app/services/`** – RAG domain logic: documents, embeddings, Firebase storage, chunk processing, **shared semantic search** used by both HTTP and the agent tool.
+- **`app/core/`** – Settings and SQLAlchemy engine/session (`config`, `database`).
+- **`app/agent/`** – LangGraph **react** agent with a `semantic_search` tool (in-process retrieval, same logic as `GET /search/llm`).
+- **`database/`** – Manual SQL for pgvector + RAG tables (`001`, `002`). Checkpoint tables for LangGraph are created automatically by `langgraph-checkpoint-postgres` on startup (same `DATABASE_URL`).
+
+### Data flow
 
 1. A client uploads a document to the API.
 2. The document is stored (e.g. in Firebase Storage) and its metadata goes into PostgreSQL.
 3. The document is processed into text chunks and stored in the `text_chunks` table.
 4. Each chunk receives an embedding using OpenAI and is stored in the `embeddings` table (with `pgvector`).
 5. Semantic search endpoints query the vector store to find the most relevant chunks.
+6. **`POST /chat`** runs the LangGraph agent with **Postgres-backed thread history** (`thread_id` in the request body).
 
 <!-- IMAGE_PROMPT:
 Generate a clean architecture diagram for this RAG API:
@@ -71,6 +84,7 @@ Style: minimal, modern, developer-friendly, neutral colors, no background image.
 - **Embeddings**: OpenAI (`text-embedding-3-small`)
 - **Storage (optional)**: Firebase Storage / Google Cloud Storage
 - **Server**: Uvicorn (with `Procfile` for Railway)
+- **Agent**: LangGraph + `langgraph-checkpoint-postgres` (Postgres checkpoints, `setup()` on startup)
 
 ---
 
@@ -112,7 +126,19 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-> Note: Versions are not pinned on purpose. `pip` will install the latest stable versions compatible with this project.
+> Core API dependencies are unpinned for flexibility; LangGraph-related packages use **minimum versions** in `requirements.txt` so checkpoint and agent APIs stay compatible.
+
+### Tests
+
+```bash
+pytest
+```
+
+By default, only lightweight tests run. To run the integration test that imports the full app (needs working `.env` with database + OpenAI):
+
+```bash
+pytest -m integration
+```
 
 ---
 
@@ -130,6 +156,8 @@ pip install -r requirements.txt
 
    - PostgreSQL connection URLs (`DATABASE_PUBLIC_URL`, optionally `DATABASE_URL`).
    - `OPENAI_API_KEY`.
+   - Optional `OPENAI_CHAT_MODEL` (default `gpt-4o-mini`) for **`POST /chat`**.
+   - Optional **`AGENT_SYSTEM_PROMPT`**: extra system text for the ReAct loop only. Default is none—the final answer shape is enforced by structured output ([`AgentAnswerPayload`](b:/Documentos/Programacao/open-source/RAG/RAG-API/app/agent/schemas.py): `reply` + `source_document_ids` the model claims it used, validated against `document_id` values from `semantic_search` tool JSON).
    - Firebase / Google Cloud credentials if you plan to upload files there.
    - Optional `HOST` and `PORT` overrides.
 
@@ -157,7 +185,7 @@ This will install the `vector` type if it is not already available.
 
 ### 2. Create tables and indexes
 
-Then run `database/002_tables_creation.sql`:
+Run `database/002_tables_creation.sql` against the same database. It:
 
 - Drops existing tables (if they exist).
 - Creates the following tables:
@@ -194,6 +222,10 @@ This schema is intentionally simple and optimized for:
 - Efficient lookups by document id or chunk id.
 - Fast vector similarity queries using `pgvector`.
 
+### 3. LangGraph checkpoints (automatic)
+
+On startup, if the database is reachable, the API runs the Postgres checkpointer’s **`setup()`**, which creates/updates **checkpoint tables** (separate from `documents` / `text_chunks` / `embeddings`). No extra SQL file is required unless you prefer to vendor DDL for auditing.
+
 <!-- IMAGE_PROMPT:
 Generate a simple relational diagram showing three tables:
 - documents (id, file_id, file_name, file_hash, file_url, processed_at)
@@ -215,10 +247,10 @@ This API can be used on its own, but it is also designed to work well with:
 - **React client application**  
   A frontend where end users can upload and manage documents (files tab) and, optionally, chat with an assistant powered by this RAG backend.
 
-- **Agent / RAG client (e.g. LangChain)**  
-  A separate service or script that consumes the `/search` and `/search/llm` endpoints, builds prompts, and answers user questions using the retrieved context.
+- **Agent / RAG client**  
+  This API now includes **`POST /chat`** (LangGraph + tool calling + Postgres checkpoints). You can still call `/search` and `/search/llm` from external clients if you prefer.
 
-You can keep the React client and the agent code in their own repositories, pointing both to this API as the shared RAG backend.
+You can keep a React client in another repository pointing at this API as the shared RAG backend.
 
 ---
 
@@ -230,11 +262,13 @@ With your virtual environment active and `.env` configured:
 python main.py
 ```
 
-Or, directly with Uvicorn:
+Or, directly with Uvicorn (recommended module path):
 
 ```bash
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
+
+`python main.py` still works and runs the same application.
 
 By default, the API will be available at:
 
@@ -317,6 +351,13 @@ By default, the API will be available at:
   - `query`
   - `sources`: array of `{ text, file_name, file_url }`, where `text` already concatenates previous, current and next chunk.
 
+### Chat (LangGraph)
+
+- `POST /chat`
+  JSON body: `{ "message": "<user text>", "thread_id": "<stable conversation id>" }`.
+  Returns: `{ "reply": "<assistant text>", "thread_id": "...", "sources": [...] }`. The `sources` array lists `{ "file_name", "file_url" }` resolved from `semantic_search` for each structured `source_document_id` that appeared in that turn’s tool output (unknown ids are dropped). `reply` is plain text; known source URLs are stripped from `reply` if the model pasted them. Empty `sources` if no search or no matching http(s) `file_url` in tool rows.
+  Conversation state is persisted in PostgreSQL via LangGraph checkpoints (same database URL as the RAG tables). If the DB or checkpointer failed to initialize, this endpoint returns **503**.
+
 ---
 
 ## Deployment (Procfile-compatible platforms)
@@ -324,7 +365,7 @@ By default, the API will be available at:
 This repository includes a `Procfile` that can be used on platforms that support the Procfile convention (for example, Railway or Heroku):
 
 ```Procfile
-web: uvicorn main:app --host 0.0.0.0 --port $PORT
+web: uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
 On a Procfile-compatible PaaS (e.g. Railway):

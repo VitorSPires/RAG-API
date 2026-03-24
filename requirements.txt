@@ -11,4 +11,11 @@ tiktoken
 python-docx
 PyPDF2
 firebase-admin
-google-cloud-storage 
+google-cloud-storage
+
+langgraph
+langgraph-checkpoint-postgres
+langchain-openai
+psycopg[binary,pool]
+
+pytest

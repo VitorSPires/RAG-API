@@ -1,6 +1,7 @@
 import logging
 import os
 from functools import lru_cache
+from typing import Optional
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
@@ -65,6 +66,19 @@ def create_database_engine():
 
 def get_embedding_model() -> str:
     return (os.getenv("OPENAI_EMBEDDING_MODEL") or "text-embedding-3-small").strip()
+
+
+def get_chat_model() -> str:
+    return (os.getenv("OPENAI_CHAT_MODEL") or "gpt-4o-mini").strip()
+
+
+def get_optional_agent_system_prompt() -> Optional[str]:
+    """
+    Optional extra system message for the ReAct loop only.
+    Behavior for replies and sources is driven mainly by AgentAnswerPayload field descriptions.
+    """
+    custom = (os.getenv("AGENT_SYSTEM_PROMPT") or "").strip()
+    return custom or None
 
 
 def get_cors_allowed_origins():

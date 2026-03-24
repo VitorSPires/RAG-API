@@ -45,7 +45,46 @@
         }
 
         .content {
+            padding: 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #eee;
+            background: #fafafa;
+            padding: 0 20px;
+        }
+
+        .tab {
+            padding: 16px 28px;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .tab:hover {
+            color: #f39c12;
+        }
+
+        .tab.active {
+            color: #fbbe0a;
+            border-bottom-color: #fbbe0a;
+        }
+
+        .tab-panel {
+            display: none;
             padding: 30px;
+        }
+
+        .tab-panel.active {
+            display: block;
         }
 
         .stats {
@@ -131,6 +170,15 @@
         .btn-primary:hover:not(:disabled) {
             background: #f39c12;
             transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #dee2e6;
         }
 
         .btn-danger {
@@ -226,6 +274,216 @@
             word-break: break-all;
         }
 
+        .chat-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .chat-messages {
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            min-height: 320px;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .chat-bubble-row {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .chat-bubble-row.user {
+            justify-content: flex-end;
+        }
+
+        .chat-bubble-row.assistant,
+        .chat-bubble-row.system {
+            justify-content: flex-start;
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .chat-bubble.user {
+            background: linear-gradient(135deg, #fbbe0a 0%, #f39c12 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-bubble.assistant {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-bubble.assistant .chat-md {
+            white-space: normal;
+        }
+
+        .chat-bubble.assistant .chat-md p {
+            margin: 0.4em 0;
+        }
+
+        .chat-bubble.assistant .chat-md p:first-child {
+            margin-top: 0;
+        }
+
+        .chat-bubble.assistant .chat-md p:last-child {
+            margin-bottom: 0;
+        }
+
+        .chat-bubble.assistant .chat-md ul,
+        .chat-bubble.assistant .chat-md ol {
+            margin: 0.4em 0;
+            padding-left: 1.35em;
+        }
+
+        .chat-bubble.assistant .chat-md li {
+            margin: 0.25em 0;
+        }
+
+        .chat-bubble.assistant .chat-md li > p {
+            margin: 0.15em 0;
+        }
+
+        .chat-bubble.assistant .chat-md strong {
+            font-weight: 700;
+        }
+
+        .chat-bubble.assistant .chat-md em {
+            font-style: italic;
+        }
+
+        .chat-bubble.assistant .chat-md a {
+            color: #c87f0a;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        .chat-bubble.assistant .chat-md code {
+            font-family: ui-monospace, 'Cascadia Code', monospace;
+            font-size: 0.92em;
+            background: #f4f4f5;
+            padding: 0.1em 0.35em;
+            border-radius: 4px;
+        }
+
+        .chat-bubble.assistant .chat-md pre {
+            margin: 0.5em 0;
+            padding: 10px 12px;
+            background: #f4f4f5;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .chat-bubble.assistant .chat-md pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .chat-source-pill-static {
+            cursor: default;
+        }
+
+        .chat-source-pill-static:hover {
+            transform: none;
+        }
+
+        .chat-bubble.system,
+        .chat-bubble.error {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+            max-width: 100%;
+        }
+
+        .chat-bubble.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .chat-bubble.thinking {
+            background: #e9ecef;
+            color: #666;
+            font-style: italic;
+        }
+
+        .chat-assistant-block {
+            max-width: 85%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .chat-sources-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .chat-source-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: white;
+            border: 1px solid #fbbe0a;
+            color: #333;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .chat-source-pill:hover {
+            background: #fff9e6;
+            transform: translateY(-1px);
+        }
+
+        .chat-source-icon {
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input-row textarea {
+            flex: 1;
+            padding: 12px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 48px;
+        }
+
+        .chat-input-row textarea:focus {
+            outline: none;
+            border-color: #fbbe0a;
+        }
+
         /* Modal de Loading */
         .loading-modal {
             display: none;
@@ -295,57 +553,308 @@
         </div>
 
         <div class="content">
-            <!-- Statistics -->
-            <div class="stats" id="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="total-docs">-</div>
-                    <div class="stat-label">Total Documents</div>
+            <nav class="tabs" role="tablist" aria-label="Main">
+                <button type="button" class="tab active" id="tab-documents" role="tab" aria-selected="true" aria-controls="panel-documents">Documents</button>
+                <button type="button" class="tab" id="tab-chat" role="tab" aria-selected="false" aria-controls="panel-chat">Chat</button>
+            </nav>
+
+            <div id="panel-documents" class="tab-panel active" role="tabpanel" aria-labelledby="tab-documents">
+                <!-- Statistics -->
+                <div class="stats" id="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-docs">-</div>
+                        <div class="stat-label">Total Documents</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-size">-</div>
+                        <div class="stat-label">Total Size</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="last-upload">-</div>
+                        <div class="stat-label">Last Upload</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="total-size">-</div>
-                    <div class="stat-label">Total Size</div>
+
+                <!-- Upload section -->
+                <div class="upload-section">
+                    <h3 style="margin-bottom: 15px; color: #333;">📤 Add New Document</h3>
+                    <form class="upload-form" id="upload-form">
+                        <input type="file" class="file-input" id="file-input" required>
+                        <button type="submit" class="btn btn-primary" id="upload-btn">Upload</button>
+                    </form>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="last-upload">-</div>
-                    <div class="stat-label">Last Upload</div>
+
+                <!-- Messages -->
+                <div id="messages"></div>
+
+                <!-- Documents table -->
+                <div class="table-container">
+                    <table class="documents-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>File Name</th>
+                                <th>Hash</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documents-tbody">
+                            <tr>
+                                <td colspan="5" class="loading">Loading documents...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Upload section -->
-            <div class="upload-section">
-                <h3 style="margin-bottom: 15px; color: #333;">📤 Add New Document</h3>
-                <form class="upload-form" id="upload-form">
-                    <input type="file" class="file-input" id="file-input" required>
-                    <button type="submit" class="btn btn-primary" id="upload-btn">Upload</button>
-                </form>
-            </div>
-
-            <!-- Messages -->
-            <div id="messages"></div>
-
-            <!-- Documents table -->
-            <div class="table-container">
-                <table class="documents-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>File Name</th>
-                            <th>Hash</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="documents-tbody">
-                        <tr>
-                            <td colspan="5" class="loading">Loading documents...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div id="panel-chat" class="tab-panel" role="tabpanel" aria-labelledby="tab-chat" hidden>
+                <div class="chat-toolbar">
+                    <button type="button" class="btn btn-secondary btn-sm" id="chat-new-thread">New conversation</button>
+                </div>
+                <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+                <div class="chat-input-row">
+                    <textarea id="chat-input" placeholder="Ask about your documents..." rows="2"></textarea>
+                    <button type="button" class="btn btn-primary" id="chat-send">Send</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" crossorigin="anonymous"></script>
     <script>
+        const THREAD_STORAGE_KEY = 'rag_thread_id';
+
+        (function initMarkdown() {
+            if (typeof marked !== 'undefined' && typeof marked.use === 'function') {
+                marked.use({ gfm: true, breaks: true });
+            } else if (typeof marked !== 'undefined' && typeof marked.setOptions === 'function') {
+                marked.setOptions({ gfm: true, breaks: true });
+            }
+        })();
+
+        function assistantReplyToSafeHtml(text) {
+            var t = text || '';
+            if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+                return null;
+            }
+            try {
+                var raw = marked.parse(t);
+                return DOMPurify.sanitize(raw);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function generateThreadId() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                return crypto.randomUUID();
+            }
+            return 't-' + Date.now() + '-' + Math.random().toString(36).slice(2, 12);
+        }
+
+        function getOrCreateThreadId() {
+            let id = localStorage.getItem(THREAD_STORAGE_KEY);
+            if (!id) {
+                id = generateThreadId();
+                localStorage.setItem(THREAD_STORAGE_KEY, id);
+            }
+            return id;
+        }
+
+        function switchTab(name) {
+            const tabDocs = document.getElementById('tab-documents');
+            const tabChat = document.getElementById('tab-chat');
+            const panelDocs = document.getElementById('panel-documents');
+            const panelChat = document.getElementById('panel-chat');
+
+            if (name === 'chat') {
+                tabDocs.classList.remove('active');
+                tabDocs.setAttribute('aria-selected', 'false');
+                panelDocs.classList.remove('active');
+                panelDocs.hidden = true;
+
+                tabChat.classList.add('active');
+                tabChat.setAttribute('aria-selected', 'true');
+                panelChat.classList.add('active');
+                panelChat.hidden = false;
+            } else {
+                tabChat.classList.remove('active');
+                tabChat.setAttribute('aria-selected', 'false');
+                panelChat.classList.remove('active');
+                panelChat.hidden = true;
+
+                tabDocs.classList.add('active');
+                tabDocs.setAttribute('aria-selected', 'true');
+                panelDocs.classList.add('active');
+                panelDocs.hidden = false;
+            }
+        }
+
+        document.getElementById('tab-documents').addEventListener('click', () => switchTab('documents'));
+        document.getElementById('tab-chat').addEventListener('click', () => switchTab('chat'));
+
+        function appendChatBubble(role, text, extraClass) {
+            const container = document.getElementById('chat-messages');
+            const row = document.createElement('div');
+            row.className = 'chat-bubble-row ' + role;
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble ' + role + (extraClass ? ' ' + extraClass : '');
+            bubble.textContent = text;
+            row.appendChild(bubble);
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+            return row;
+        }
+
+        function truncateFileName(str, n) {
+            if (!str) return '';
+            return str.length <= n ? str : str.slice(0, n - 1) + '…';
+        }
+
+        function appendAssistantReply(reply, sources) {
+            const container = document.getElementById('chat-messages');
+            const row = document.createElement('div');
+            row.className = 'chat-bubble-row assistant';
+            const block = document.createElement('div');
+            block.className = 'chat-assistant-block';
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble assistant';
+            var mdHtml = assistantReplyToSafeHtml(reply);
+            if (mdHtml !== null) {
+                const md = document.createElement('div');
+                md.className = 'chat-md';
+                md.innerHTML = mdHtml;
+                bubble.appendChild(md);
+            } else {
+                bubble.textContent = reply || '';
+            }
+            block.appendChild(bubble);
+
+            if (sources && sources.length) {
+                const bar = document.createElement('div');
+                bar.className = 'chat-sources-bar';
+                sources.forEach(function (s) {
+                    const url = (s.file_url || '').trim();
+                    const title = s.file_name || 'Document';
+                    const labelText = truncateFileName(title, 36);
+                    const icon = document.createElement('span');
+                    icon.className = 'chat-source-icon';
+                    icon.setAttribute('aria-hidden', 'true');
+                    icon.textContent = '📄';
+                    const label = document.createElement('span');
+                    label.textContent = labelText;
+                    if (/^https?:\/\//i.test(url)) {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                        a.className = 'chat-source-pill';
+                        a.title = title;
+                        a.appendChild(icon);
+                        a.appendChild(label);
+                        bar.appendChild(a);
+                    } else {
+                        const span = document.createElement('span');
+                        span.className = 'chat-source-pill chat-source-pill-static';
+                        span.title = title;
+                        span.appendChild(icon);
+                        span.appendChild(label);
+                        bar.appendChild(span);
+                    }
+                });
+                if (bar.childNodes.length) block.appendChild(bar);
+            }
+
+            row.appendChild(block);
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+            return row;
+        }
+
+        function removeNode(el) {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+        }
+
+        async function parseHttpError(response) {
+            try {
+                const j = await response.json();
+                if (j.detail !== undefined) {
+                    if (typeof j.detail === 'string') return j.detail;
+                    if (Array.isArray(j.detail)) {
+                        return j.detail.map(function (d) { return d.msg || JSON.stringify(d); }).join('; ');
+                    }
+                    return JSON.stringify(j.detail);
+                }
+            } catch (e) { /* ignore */ }
+            return response.statusText || 'Request failed';
+        }
+
+        function initChat() {
+            getOrCreateThreadId();
+
+            document.getElementById('chat-new-thread').addEventListener('click', function () {
+                const newId = generateThreadId();
+                localStorage.setItem(THREAD_STORAGE_KEY, newId);
+                document.getElementById('chat-messages').innerHTML = '';
+            });
+
+            const input = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send');
+
+            async function sendMessage() {
+                const text = input.value.trim();
+                if (!text) return;
+
+                const threadId = getOrCreateThreadId();
+                appendChatBubble('user', text);
+                input.value = '';
+
+                const thinkingRow = appendChatBubble('assistant', 'Thinking...', 'thinking');
+
+                sendBtn.disabled = true;
+                input.disabled = true;
+
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text, thread_id: threadId })
+                    });
+
+                    removeNode(thinkingRow);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        appendAssistantReply(data.reply || '', data.sources || []);
+                        return;
+                    }
+
+                    let msg = await parseHttpError(response);
+                    if (response.status === 503) {
+                        msg = 'Chat agent is unavailable (database or LangGraph checkpointer not initialized). ' + msg;
+                    }
+                    appendChatBubble('system', msg, 'error');
+                } catch (err) {
+                    removeNode(thinkingRow);
+                    appendChatBubble('system', err.message || 'Network error', 'error');
+                } finally {
+                    sendBtn.disabled = false;
+                    input.disabled = false;
+                    input.focus();
+                }
+            }
+
+            sendBtn.addEventListener('click', sendMessage);
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+
         // Helper functions
         function showMessage(message, type = 'success') {
             const messagesDiv = document.getElementById('messages');
@@ -353,7 +862,7 @@
             messageDiv.className = type;
             messageDiv.textContent = message;
             messagesDiv.appendChild(messageDiv);
-            
+
             setTimeout(() => {
                 messageDiv.remove();
             }, 5000);
@@ -388,7 +897,7 @@
             try {
                 const response = await fetch('/documents');
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     updateStats(data.data.stats);
                     updateTable(data.data.documents);
@@ -398,7 +907,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 showMessage('Error loading documents: ' + error.message, 'error');
-                document.getElementById('documents-tbody').innerHTML = 
+                document.getElementById('documents-tbody').innerHTML =
                     '<tr><td colspan="5" class="loading">Error loading documents</td></tr>';
             }
         }
@@ -413,7 +922,7 @@
         // Update table
         function updateTable(documents) {
             const tbody = document.getElementById('documents-tbody');
-            
+
             if (documents.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="loading">No documents found</td></tr>';
                 return;
@@ -432,8 +941,8 @@
                     <td>${formatDate(doc.processed_at)}</td>
                     <td>
                         <div class="actions">
-                            ${doc.file_url && doc.file_url.startsWith('http') ? 
-                                `<button class="btn btn-info btn-sm" onclick="viewDocument('${doc.file_url}')" title="View file">👁️ View</button>` : 
+                            ${doc.file_url && doc.file_url.startsWith('http') ?
+                                `<button class="btn btn-info btn-sm" onclick="viewDocument('${doc.file_url}')" title="View file">👁️ View</button>` :
                                 ''
                             }
                             <button class="btn btn-danger btn-sm" onclick="deleteDocument(${doc.id})">🗑️ Delete</button>
@@ -446,17 +955,16 @@
         // File upload
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const fileInput = document.getElementById('file-input');
             const uploadBtn = document.getElementById('upload-btn');
             const file = fileInput.files[0];
-            
+
             if (!file) {
                 showMessage('Select a file', 'error');
                 return;
             }
 
-            // Disable button and show loading
             uploadBtn.disabled = true;
             uploadBtn.textContent = 'Uploading...';
             showLoading('Uploading file...', 'This may take a few seconds');
@@ -471,7 +979,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     showMessage('Document added successfully!');
                     fileInput.value = '';
@@ -485,13 +993,12 @@
                 console.error('Error:', error);
                 showMessage('Upload error: ' + error.message, 'error');
             } finally {
-                // Re-enable button and hide loading
                 uploadBtn.disabled = false;
                 uploadBtn.textContent = 'Upload';
                 hideLoading();
             }
         });
-        
+
         // View document
         function viewDocument(fileUrl) {
             if (fileUrl && fileUrl.startsWith('http')) {
@@ -500,14 +1007,13 @@
                 showMessage('File URL not available', 'error');
             }
         }
-        
+
         // Delete document
         async function deleteDocument(id) {
             if (!confirm('Are you sure you want to delete this document?')) {
                 return;
             }
-        
-            // Show loading
+
             showLoading('Deleting document...', 'Removing file and data...');
 
             try {
@@ -516,7 +1022,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     showMessage('Document deleted successfully!');
                     loadDocuments();
@@ -530,9 +1036,11 @@
                 hideLoading();
             }
         }
-        
-        // Load documents on startup
-        document.addEventListener('DOMContentLoaded', loadDocuments);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadDocuments();
+            initChat();
+        });
     </script>
 </body>
-</html> 
+</html>
